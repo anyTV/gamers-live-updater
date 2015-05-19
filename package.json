@@ -1,0 +1,27 @@
+{
+  "name": "gamers-live-updater",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anyTV/gamers-live-updater.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anyTV/gamers-live-updater/issues"
+  },
+  "homepage": "https://github.com/anyTV/gamers-live-updater",
+  "dependencies": {
+    "express": "^4.12.3",
+    "lodash": "^3.8.0",
+    "socket.io": "^1.3.5",
+    "superagent": "^1.2.0",
+    "superagent-no-cache": "^0.1.0",
+    "superagent-prefix": "0.0.2"
+  }
+}

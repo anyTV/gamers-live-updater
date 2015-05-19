@@ -5,8 +5,10 @@ var config = require('./config'),
     _ = require('lodash'),
     async = require('async'),
     prefix = require('superagent-prefix')(config.URL.API),
+
     streamers_old = {},
     streamers_new = {},
+
     request_streamers = function (url, callback) {
         request
             .get(url)
@@ -15,6 +17,7 @@ var config = require('./config'),
                 callback(err, res.body);
             });
     },
+
     get_twitch_streamers = function (callback) {
         request_streamers('/streamers/twitch', callback);
     },
@@ -24,15 +27,7 @@ var config = require('./config'),
     get_hitbox_streamers = function (callback) {
         request_streamers('/streamers/hitbox', callback);
     },
-    get_streamers = function (callback) {
-        async.parallel({
-                'youtube': get_youtube_streamers,
-                'twitch': get_twitch_streamers,
-                'hitbox': get_hitbox_streamers
-            }, function (err, streamers) {
-                callback(err, streamers);
-            });
-    },
+
     get_stream_id = function (stream, source) {
         var id;
 
@@ -50,6 +45,15 @@ var config = require('./config'),
 
         return id;
     },
+
+    get_streamers_async = function (callback) {
+        async.parallel({
+                'youtube': get_youtube_streamers,
+                'twitch': get_twitch_streamers,
+                'hitbox': get_hitbox_streamers
+            }, callback);
+    },
+
     check_streams = function (callback, err, streamers) {
         _.each(streamers, function(list, source) {
             streamers_new[source] = _.filter(list, function (stream) {
@@ -71,5 +75,5 @@ var config = require('./config'),
     };
 
 module.exports = function (callback) {
-    get_streamers(check_streams.bind(undefined, callback));
+    get_streamers_async(check_streams.bind(undefined, callback));
 };

@@ -28,24 +28,6 @@ var config = require('./config'),
         request_streamers('/streamers/hitbox', callback);
     },
 
-    get_stream_id = function (stream, source) {
-        var id;
-
-        switch (source) {
-            case 'youtube':
-                id =  stream.youtube_stream.id;
-                break;
-            case 'twitch':
-                id = stream.twitch.channel.name;
-                break;
-            case 'hitbox':
-                id = stream.hitbox.channel.user_name;
-                break;
-        }
-
-        return id;
-    },
-
     get_streamers_async = function (callback) {
         async.parallel({
                 'youtube': get_youtube_streamers,
@@ -59,11 +41,11 @@ var config = require('./config'),
             streamers_new[source] = _.filter(list, function (stream) {
                 return (typeof streamers_old[source] === 'undefined')
                     ? true
-                    : !~streamers_old[source].indexOf(get_stream_id(stream, source));
+                    : !~streamers_old[source].indexOf(stream.id);
             });
 
             streamers_old[source] = _.map(list, function (stream) {
-                return get_stream_id(stream, source);
+                return stream.id;
             });
 
         });

@@ -9,8 +9,8 @@ var app = require('express')(),
                 || !data.new.hitbox.length)) {
                 return false;
             }
-
-            socket.emit('update', data);
+            console.log('broadcasting streamer:update', data);
+            socket.emit('streamer:update', data);
         });
     };
 

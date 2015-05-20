@@ -14,6 +14,12 @@ var config = require('./config'),
             .get(url)
             .use(prefix)
             .end(function(err, res) {
+                if(err || !res.body) {
+                    res = {
+                        body: []
+                    };
+                }
+
                 callback(err, res.body);
             });
     },
@@ -37,6 +43,10 @@ var config = require('./config'),
     },
 
     check_streams = function (callback, err, streamers) {
+        if(err) {
+            streamers = _.extend({youtube: [], twitch: [], hitbox: []}, streamers);
+        }
+
         _.each(streamers, function(list, source) {
             streamers_new[source] = _.filter(list, function (stream) {
                 return (typeof streamers_old[source] === 'undefined')

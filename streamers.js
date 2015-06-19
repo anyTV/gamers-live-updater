@@ -1,3 +1,4 @@
+
 'use strict';
 
 var config = require('./config'),
@@ -48,16 +49,15 @@ var config = require('./config'),
         }
 
         _.each(streamers, function(list, source) {
-            streamers_new[source] = _.filter(list, function (stream) {
-                return (typeof streamers_old[source] === 'undefined')
-                    ? true
-                    : !~streamers_old[source].indexOf(stream.id);
+            streamers_new[source] = _.map(list, function (stream) {
+                return stream.stream.id;
             });
+
+            streamers_new[source] = _.xor(streamers_new[source], streamers_old[source]);
 
             streamers_old[source] = _.map(list, function (stream) {
-                return stream.id;
+                return stream.stream.id;
             });
-
         });
 
         callback(err, {

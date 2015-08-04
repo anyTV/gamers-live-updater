@@ -2,8 +2,57 @@
 
 var _ = require('lodash'),
     connections = {},
+    sessions = {},
     visitors = {},
     members = {},
+    callback = function () {},
+
+    init = function (cb) {
+        callback = cb || callback;
+        setInterval(update_online, 10000);
+    },
+
+    update_online = function () {
+        var disconnected = _(sessions).omit(function (value) {
+            return !!value;
+        })
+        .keys()
+        .value();
+
+        if (!disconnected.length) {
+            return;
+        }
+
+        remove_disconnected(disconnected);
+    },
+
+    remove_disconnected = function (disconnected) {
+        _.forEach(disconnected, function (sid) {
+            remove_session(sid);
+            remove_member(sid);
+            remove_visitor(sid);
+        });
+
+        callback(get_online());
+    },
+
+    remove_session = function (sid) {
+        if (_.has(sessions, sid)) {
+            delete sessions[sid];
+        }
+    },
+
+    remove_visitor = function (sid) {
+        if (_.has(visitors, sid)) {
+            delete visitors[sid];
+        }
+    },
+
+    remove_member = function (sid) {
+        if (_.has(members, sid)) {
+            delete members[sid];
+        }
+    },
 
     add_member = function (user) {
         members[user.sid] = {
@@ -23,54 +72,49 @@ var _ = require('lodash'),
         };
     },
 
+    update_status = function (socket_id, user) {
+        var notify = false;
+
+        if (!user.sid) {
+            return;
+        }
+
+        //check if the user is a member
+        if (user.id) {
+            notify = !_.has(members, user.sid);
+            add_member(user); 
+        }
+        else {
+            notify = !_.has(visitors, user.sid);
+            add_visitor(user);
+        }
+
+        sessions[user.sid] = true;
+        connections[socket_id] = user.sid;
+
+        //notify users if we this is new session
+        if (notify) {
+            callback(get_online());
+        }
+    },
+
     get_online = function () {
         return {
             members: _.values(members),
             visitors: _.values(visitors)
         };
     },
-
-    store_connection = function (socket_id, user) {
-        connections[socket_id] = user.sid;
-    },
-
-    update_online = function (socket_id, user) {
-        if (!user.sid) {
-            return;
-        }
-
-        if (user.id) {
-            add_member(user); 
-        }
-        else {
-            add_visitor(user);
-        }
-
-        store_connection(socket_id, user);
-    },
-
+    
     remove_connection = function (socket_id) {
         var sid = connections[socket_id];
+        sessions[sid] = false;
 
-        delete visitors[sid];
-        delete members[sid];
         delete connections[socket_id];
     };
 
-// members = [{
-//     user_id: 'c2967b9c-d708-42a8-a375-93c44085986f',
-//     name: 'Ryan Navarroza',
-//     avatar: 'http://cdn2.gamers.tm/user_avatars/c2967b9c-d708-42a8-a375-93c44085986f.jpg',
-//     href: 'http://dev.gamers.tm:8080/youtubers/c2967b9c-d708-42a8-a375-93c44085986f'
-// }, {
-//     user_id: '2fdb3578-3335-4a62-b88d-8ee523693578',
-//     name: 'Jonathan Cepeda',
-//     avatar: 'http://cdn2.gamers.tm/user_avatars/2fdb3578-3335-4a62-b88d-8ee523693578.jpg',
-//     href: 'http://dev.gamers.tm:8080/youtubers/2fdb3578-3335-4a62-b88d-8ee523693578'
-// }];
-// visitors = [{}, {}];
-
 module.exports = {
+    init: init,
+    update_status: update_status,
     update_online: update_online,
     remove_connection: remove_connection,
     get_online: get_online

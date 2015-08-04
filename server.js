@@ -20,27 +20,29 @@ var app = require('express')(),
             socket.emit('streamer:update', streamer_list);
         });
     },
-    notify_online_users = function (socket) {
-        io.sockets.emit('users:online', users.get_online());
+    notify_socket = function (socket, online_users) {
+        socket.emit('users:online', online_users);
     };
-
 
 io.on('connection', function(socket) {
     socket.emit('streamer:update', streamer_list);
 
     socket.on('users:get_online', function () {
-        notify_online_users();
+        notify_socket(socket, users.get_online());
     });
 
     socket.on('users:status', function (user) {
-        users.update_online(socket.id, user);
-        notify_online_users();
+        users.update_status(socket.id, user);
     });
 
     socket.on('disconnect', function () {
         users.remove_connection(socket.id);
-        notify_online_users();
     });
+});
+
+//intialize users module
+users.init(function (online_users) {
+    notify_socket(io.sockets, online_users); 
 });
 
 setInterval(function() {

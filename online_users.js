@@ -83,10 +83,12 @@ var _ = require('lodash'),
         if (user.id) {
             notify = !_.has(members, user.sid);
             add_member(user); 
+            remove_visitor(user.sid);
         }
         else {
             notify = !_.has(visitors, user.sid);
             add_visitor(user);
+            remove_member(user.sid);
         }
 
         sessions[user.sid] = true;

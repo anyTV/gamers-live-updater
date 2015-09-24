@@ -9,13 +9,13 @@ Running the Application
 - Download Project
 
 ```sh
-    git clone https://github.com/anyTV/comments-plugin.git
+    git clone https://github.com/anyTV/gamers-live-updater.git
 ```
 
 OR
 
 ```sh
-    git clone git@github.com:anyTV/comments-plugin.git
+    git clone git@github.com:anyTV/gamers-live-updater.git
 ```
 
 #### Point gamers.tm -> 127.0.0.1
